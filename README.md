@@ -1,27 +1,19 @@
 # MyTeslaGuard
 
-ASP.NET Core 8 MVC dashboard for monitoring Tesla posted speed limit vs current vehicle speed.
+ASP.NET Core 8 MVC navigation + speed-guard dashboard for Tesla.
 
 ## Features
 
-- **Two large glanceable circles**
-  - Left: Posted speed limit
-  - Right: Current vehicle speed (color changes with overspeed)
-- **Color-coded overspeed bar** (4 bands of 5 mph):
-  - 0–5 mph over → white
-  - 5–10 mph over → light yellow
-  - 10–15 mph over → light orange
-  - 15–20+ mph over → light red
-- **Beep alerts** (configurable)
-  - Beeps when entering the **orange** or **red** band
-  - Independent toggles for each level
-  - Throttled to once every **3 minutes** per band transition (configurable in JS)
-  - Uses Web Audio API + optional browser Notification
-- **Background / not-in-focus support** (best-effort)
-  - Browser Notifications when permission granted
-  - PWA manifest for “Add to Home Screen”
-  - Audio continues while tab is open (even if not focused)
-  - True silent background is limited by browser policies; for always-on consider a native wrapper
+- **Full-screen navigation map** (Leaflet + OpenStreetMap)
+  - Destination address input
+  - **Avoid Highways** checkbox
+  - **Go** button starts route (OSRM public router) and animates progress
+- **Transparent HUD overlay** on the map with all previous speed features:
+  - Two glanceable circles (Posted / My Speed)
+  - Color-coded overspeed bar (white / yellow / orange / red)
+  - Configurable beep alerts for orange & red bands (3-min throttle)
+  - Browser notifications + background-friendly audio
+- PWA-ready (Add to Home Screen)
 
 ## Quick Start
 

@@ -1,6 +1,7 @@
 :root {
     --bg: #0d1117;
-    --card: #161b22;
+    --card: rgba(22, 27, 34, 0.82);
+    --card-solid: #161b22;
     --text: #e6edf3;
     --muted: #8b949e;
     --accent: #58a6ff;
@@ -16,75 +17,164 @@
     padding: 0;
 }
 
-body {
+html, body {
+    height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .app-container {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 12px;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    max-width: none;
+    margin: 0;
+    padding: 0;
 }
 
-.dashboard {
+/* ===== Map full screen ===== */
+.map-app {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+}
+
+.map-container {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: #1a1a1a;
+}
+
+/* ===== Transparent HUD Overlay ===== */
+.hud-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1000;
+    pointer-events: none; /* map stays interactive */
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    justify-content: space-between;
+    padding: 10px;
 }
 
-.header {
+.hud-overlay > * {
+    pointer-events: auto; /* re-enable for controls */
+}
+
+/* Top navigation bar */
+.nav-top {
+    background: var(--card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 14px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+}
+
+.dest-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.dest-input {
+    flex: 1;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    color: var(--text);
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.dest-input:focus {
+    border-color: var(--accent);
+}
+
+.avoid-highways {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.go-btn {
+    background: #238636;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.go-btn:hover {
+    background: #2ea043;
+}
+
+.go-btn:active {
+    transform: scale(0.97);
+}
+
+.status-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 4px;
+    font-size: 0.75rem;
 }
 
-.header h1 {
-    font-size: 1.4rem;
+.app-title {
     font-weight: 700;
-    letter-spacing: -0.5px;
+    color: var(--accent);
 }
 
 .status {
-    font-size: 0.75rem;
     color: var(--muted);
-    background: var(--card);
-    padding: 4px 10px;
-    border-radius: 12px;
 }
 
 .status.live {
     color: #3fb950;
 }
 
-/* Gauges */
-.gauges-row {
-    display: flex;
-    justify-content: space-around;
-    gap: 12px;
+.nav-status {
+    color: var(--muted);
+    font-style: italic;
 }
 
-.gauge-card {
-    flex: 1;
+/* Compact gauges */
+.hud-gauges {
     display: flex;
     justify-content: center;
+    gap: 18px;
+    margin: 12px 0;
+    pointer-events: none;
 }
 
 .circle-gauge {
-    width: 150px;
-    height: 150px;
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     background: var(--card);
-    border: 6px solid #30363d;
-    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 5px solid #30363d;
+    box-shadow: 0 0 18px rgba(0,0,0,0.45);
     transition: border-color 0.3s, box-shadow 0.3s;
 }
 
@@ -98,59 +188,58 @@ body {
 
 .circle-gauge.current.over-yellow {
     border-color: var(--yellow-band);
-    box-shadow: 0 0 25px rgba(255, 243, 176, 0.4);
+    box-shadow: 0 0 22px rgba(255, 243, 176, 0.45);
 }
 
 .circle-gauge.current.over-orange {
     border-color: var(--orange-band);
-    box-shadow: 0 0 25px rgba(255, 179, 71, 0.5);
+    box-shadow: 0 0 22px rgba(255, 179, 71, 0.55);
 }
 
 .circle-gauge.current.over-red {
     border-color: var(--red-band);
-    box-shadow: 0 0 30px rgba(255, 107, 107, 0.6);
+    box-shadow: 0 0 28px rgba(255, 107, 107, 0.65);
     animation: pulse-red 1.2s infinite;
 }
 
 @keyframes pulse-red {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.03); }
+    50% { transform: scale(1.04); }
 }
 
 .circle-value {
-    font-size: 2.8rem;
+    font-size: 2rem;
     font-weight: 800;
     line-height: 1;
 }
 
 .circle-label {
-    font-size: 0.7rem;
+    font-size: 0.62rem;
     color: var(--muted);
-    margin-top: 4px;
-    letter-spacing: 1px;
+    margin-top: 3px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
 }
 
 /* Overspeed bar */
-.overspeed-section {
+.hud-overspeed {
     background: var(--card);
-    border-radius: 16px;
-    padding: 16px;
-}
-
-.overspeed-label {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-bottom: 10px;
-    text-align: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    max-width: 340px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .overspeed-bar {
     display: flex;
-    height: 48px;
-    border-radius: 10px;
+    height: 36px;
+    border-radius: 8px;
     overflow: hidden;
-    border: 2px solid #30363d;
+    border: 1px solid #30363d;
 }
 
 .band {
@@ -158,18 +247,18 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: #222;
-    opacity: 0.45;
+    opacity: 0.4;
     transition: opacity 0.25s, transform 0.25s;
 }
 
 .band.active {
     opacity: 1;
-    transform: scaleY(1.08);
+    transform: scaleY(1.1);
     z-index: 1;
-    box-shadow: 0 0 12px rgba(255,255,255,0.3);
+    box-shadow: 0 0 10px rgba(255,255,255,0.25);
 }
 
 .band.white { background: var(--white-band); }
@@ -179,45 +268,41 @@ body {
 
 .over-value {
     text-align: center;
-    margin-top: 12px;
-    font-size: 1.1rem;
+    margin-top: 8px;
+    font-size: 0.95rem;
     font-weight: 600;
 }
 
-/* Controls */
-.controls {
+/* Bottom HUD */
+.hud-bottom {
     background: var(--card);
-    border-radius: 16px;
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.beep-settings {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 14px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,0.08);
     display: flex;
     flex-direction: column;
     gap: 8px;
-    font-size: 0.9rem;
+    align-items: center;
 }
 
-.beep-levels {
+.beep-toggles {
     display: flex;
-    gap: 16px;
-    padding-left: 8px;
+    gap: 14px;
+    font-size: 0.8rem;
 }
 
-.beep-settings label {
+.beep-toggles label {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     cursor: pointer;
 }
 
 .demo-buttons {
     display: flex;
-    gap: 8px;
-    justify-content: center;
+    gap: 6px;
 }
 
 .demo-buttons button {
@@ -225,10 +310,9 @@ body {
     color: var(--text);
     border: 1px solid #30363d;
     border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 0.85rem;
+    padding: 6px 12px;
+    font-size: 0.8rem;
     cursor: pointer;
-    transition: background 0.2s;
 }
 
 .demo-buttons button:hover {
@@ -236,23 +320,31 @@ body {
 }
 
 .info {
-    font-size: 0.8rem;
-    color: var(--muted);
-    text-align: center;
-}
-
-.info.muted {
     font-size: 0.7rem;
-    opacity: 0.7;
+    color: var(--muted);
 }
 
-/* Mobile glanceable optimizations */
-@media (max-width: 400px) {
+/* Leaflet overrides so map controls sit above overlay where needed */
+.leaflet-control-container {
+    z-index: 900;
+}
+
+/* Mobile tweaks */
+@media (max-width: 420px) {
     .circle-gauge {
-        width: 130px;
-        height: 130px;
+        width: 92px;
+        height: 92px;
     }
     .circle-value {
-        font-size: 2.3rem;
+        font-size: 1.65rem;
+    }
+    .dest-row {
+        flex-wrap: wrap;
+    }
+    .avoid-highways {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin-top: 4px;
     }
 }

@@ -1,60 +1,67 @@
 @{
-    ViewData["Title"] = "MyTeslaGuard";
+    ViewData["Title"] = "MyTeslaGuard Navigation";
 }
 
-<div class="dashboard">
-    <header class="header">
-        <h1>MyTeslaGuard</h1>
-        <div class="status" id="connectionStatus">Connecting...</div>
-    </header>
+<div class="map-app">
+    <!-- Full-screen map -->
+    <div id="map" class="map-container"></div>
 
-    <div class="gauges-row">
-        <!-- Posted Speed Circle -->
-        <div class="gauge-card">
+    <!-- Transparent HUD Overlay -->
+    <div class="hud-overlay">
+        <!-- Top bar: destination + controls -->
+        <div class="nav-top">
+            <div class="dest-row">
+                <input type="text" id="destinationInput" class="dest-input"
+                       placeholder="Enter destination address..." autocomplete="off" />
+                <label class="avoid-highways">
+                    <input type="checkbox" id="avoidHighways" />
+                    <span>Avoid Highways</span>
+                </label>
+                <button id="goBtn" class="go-btn">Go</button>
+            </div>
+            <div class="status-row">
+                <span class="app-title">MyTeslaGuard</span>
+                <span class="status" id="connectionStatus">Connecting...</span>
+                <span class="nav-status" id="navStatus">Ready</span>
+            </div>
+        </div>
+
+        <!-- Speed gauges (compact for overlay) -->
+        <div class="hud-gauges">
             <div class="circle-gauge posted" id="postedCircle">
                 <div class="circle-value" id="postedSpeed">--</div>
                 <div class="circle-label">POSTED</div>
             </div>
-        </div>
-
-        <!-- Current Speed Circle -->
-        <div class="gauge-card">
             <div class="circle-gauge current" id="currentCircle">
                 <div class="circle-value" id="currentSpeed">--</div>
                 <div class="circle-label">MY SPEED</div>
             </div>
         </div>
-    </div>
 
-    <!-- Overspeed Band Rectangle -->
-    <div class="overspeed-section">
-        <div class="overspeed-label">Speed Over Limit (mph)</div>
-        <div class="overspeed-bar" id="overspeedBar">
-            <div class="band white" data-band="white" title="0-5 over">0-5</div>
-            <div class="band yellow" data-band="yellow" title="5-10 over">5-10</div>
-            <div class="band orange" data-band="orange" title="10-15 over">10-15</div>
-            <div class="band red" data-band="red" title="15-20+ over">15-20+</div>
-        </div>
-        <div class="over-value" id="overValue">0 mph over</div>
-    </div>
-
-    <!-- Controls / Demo -->
-    <div class="controls">
-        <div class="beep-settings">
-            <label>
-                <input type="checkbox" id="beepEnabled" checked /> Enable Beep Alerts
-            </label>
-            <div class="beep-levels">
-                <label><input type="checkbox" id="beepOrange" checked /> Orange (10-15)</label>
-                <label><input type="checkbox" id="beepRed" checked /> Red (15+)</label>
+        <!-- Overspeed bar -->
+        <div class="hud-overspeed">
+            <div class="overspeed-bar" id="overspeedBar">
+                <div class="band white" data-band="white">0-5</div>
+                <div class="band yellow" data-band="yellow">5-10</div>
+                <div class="band orange" data-band="orange">10-15</div>
+                <div class="band red" data-band="red">15+</div>
             </div>
+            <div class="over-value" id="overValue">Within limit</div>
         </div>
-        <div class="demo-buttons">
-            <button onclick="setScenario('city')">City</button>
-            <button onclick="setScenario('highway')">Highway</button>
-            <button onclick="setScenario('overspeed')">Overspeed</button>
+
+        <!-- Bottom controls (collapsible / compact) -->
+        <div class="hud-bottom">
+            <div class="beep-toggles">
+                <label><input type="checkbox" id="beepEnabled" checked /> Beeps</label>
+                <label><input type="checkbox" id="beepOrange" checked /> Orange</label>
+                <label><input type="checkbox" id="beepRed" checked /> Red</label>
+            </div>
+            <div class="demo-buttons">
+                <button onclick="setScenario('city')">City</button>
+                <button onclick="setScenario('highway')">Hwy</button>
+                <button onclick="setScenario('overspeed')">Over</button>
+            </div>
+            <div class="info" id="lastUpdate">--</div>
         </div>
-        <div class="info" id="lastUpdate">Last update: --</div>
-        <div class="info muted">Poll interval: ~5s | Beep check: every 3 min when band changes</div>
     </div>
 </div>
