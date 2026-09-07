@@ -1,0 +1,17 @@
+{
+  "name": "MyTeslaGuard",
+  "short_name": "TeslaGuard",
+  "description": "Tesla speed limit guard with visual and audio alerts",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

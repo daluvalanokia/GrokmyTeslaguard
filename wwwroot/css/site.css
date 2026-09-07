@@ -1,0 +1,258 @@
+:root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --white-band: #f0f0f0;
+    --yellow-band: #fff3b0;
+    --orange-band: #ffb347;
+    --red-band: #ff6b6b;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.app-container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 12px;
+}
+
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 4px;
+}
+
+.header h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.status {
+    font-size: 0.75rem;
+    color: var(--muted);
+    background: var(--card);
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.status.live {
+    color: #3fb950;
+}
+
+/* Gauges */
+.gauges-row {
+    display: flex;
+    justify-content: space-around;
+    gap: 12px;
+}
+
+.gauge-card {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.circle-gauge {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--card);
+    border: 6px solid #30363d;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.circle-gauge.posted {
+    border-color: #58a6ff;
+}
+
+.circle-gauge.current {
+    border-color: #3fb950;
+}
+
+.circle-gauge.current.over-yellow {
+    border-color: var(--yellow-band);
+    box-shadow: 0 0 25px rgba(255, 243, 176, 0.4);
+}
+
+.circle-gauge.current.over-orange {
+    border-color: var(--orange-band);
+    box-shadow: 0 0 25px rgba(255, 179, 71, 0.5);
+}
+
+.circle-gauge.current.over-red {
+    border-color: var(--red-band);
+    box-shadow: 0 0 30px rgba(255, 107, 107, 0.6);
+    animation: pulse-red 1.2s infinite;
+}
+
+@keyframes pulse-red {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+}
+
+.circle-value {
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.circle-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Overspeed bar */
+.overspeed-section {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.overspeed-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.overspeed-bar {
+    display: flex;
+    height: 48px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #30363d;
+}
+
+.band {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #222;
+    opacity: 0.45;
+    transition: opacity 0.25s, transform 0.25s;
+}
+
+.band.active {
+    opacity: 1;
+    transform: scaleY(1.08);
+    z-index: 1;
+    box-shadow: 0 0 12px rgba(255,255,255,0.3);
+}
+
+.band.white { background: var(--white-band); }
+.band.yellow { background: var(--yellow-band); }
+.band.orange { background: var(--orange-band); }
+.band.red { background: var(--red-band); }
+
+.over-value {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Controls */
+.controls {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.beep-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.beep-levels {
+    display: flex;
+    gap: 16px;
+    padding-left: 8px;
+}
+
+.beep-settings label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.demo-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.demo-buttons button {
+    background: #21262d;
+    color: var(--text);
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.demo-buttons button:hover {
+    background: #30363d;
+}
+
+.info {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: center;
+}
+
+.info.muted {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+/* Mobile glanceable optimizations */
+@media (max-width: 400px) {
+    .circle-gauge {
+        width: 130px;
+        height: 130px;
+    }
+    .circle-value {
+        font-size: 2.3rem;
+    }
+}
