@@ -13,6 +13,9 @@ ASP.NET Core 8 MVC navigation + speed-guard dashboard for Tesla.
   - Color-coded overspeed bar (white / yellow / orange / red)
   - Configurable beep alerts for orange & red bands (3-min throttle)
   - Browser notifications + background-friendly audio
+- **Vehicle status (top of HUD)**
+  - Battery % + estimated range (miles)
+  - Tire pressures (FL / FR / RL / RR) with low/critical color cues
 - PWA-ready (Add to Home Screen)
 
 ## Quick Start
