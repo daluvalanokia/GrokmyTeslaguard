@@ -2,7 +2,10 @@
 // Keeps all previous speed, color bands, and beep logic
 
 const POLL_INTERVAL_MS = 5000;
-const BEEP_CHECK_INTERVAL_MS = 3 * 60 * 1000;
+// Periodic overspeed alerts while speed stays in band:
+// orange (10–15 over) → every 3 minutes; red (15+ over) → every 1 minute
+const BEEP_INTERVAL_ORANGE_MS = 3 * 60 * 1000;
+const BEEP_INTERVAL_RED_MS = 1 * 60 * 1000;
 
 // Beep configuration
 let beepEnabled = true;
@@ -12,6 +15,7 @@ let beepRedEnabled = true;
 // State
 let lastBand = "none";
 let lastBeepTime = 0;
+let lastBeepBand = "none";
 let audioCtx = null;
 let currentData = null;
 let map = null;
@@ -44,13 +48,26 @@ function ensureAudioContext() {
     return audioCtx;
 }
 
-function playBeep(type = "orange") {
+/**
+ * Beep while overspeed is maintained:
+ * - orange (10–15 mph over): every 3 minutes
+ * - red (15+ mph over): every 1 minute
+ * Immediate beep when first entering that band (or switching between orange/red).
+ */
+function playBeepIfDue(type) {
     if (!beepEnabled) return;
+    if (type !== "orange" && type !== "red") return;
     if (type === "orange" && !beepOrangeEnabled) return;
     if (type === "red" && !beepRedEnabled) return;
 
     const now = Date.now();
-    if (now - lastBeepTime < BEEP_CHECK_INTERVAL_MS && lastBand === type) {
+    const interval = type === "red" ? BEEP_INTERVAL_RED_MS : BEEP_INTERVAL_ORANGE_MS;
+    const bandChanged = lastBeepBand !== type;
+    const intervalElapsed = (now - lastBeepTime) >= interval;
+
+    // First entry into this alert band → beep immediately
+    // Staying in band → beep again only after the band-specific interval
+    if (!bandChanged && !intervalElapsed) {
         return;
     }
 
@@ -63,24 +80,45 @@ function playBeep(type = "orange") {
         gain.connect(ctx.destination);
 
         if (type === "red") {
+            // Double pulse for red (more urgent)
             oscillator.frequency.value = 880;
             gain.gain.value = 0.25;
             oscillator.type = "square";
+            oscillator.start();
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+            oscillator.stop(ctx.currentTime + 0.25);
+
+            setTimeout(() => {
+                try {
+                    const o2 = ctx.createOscillator();
+                    const g2 = ctx.createGain();
+                    o2.connect(g2);
+                    g2.connect(ctx.destination);
+                    o2.frequency.value = 990;
+                    g2.gain.value = 0.22;
+                    o2.type = "square";
+                    o2.start();
+                    g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    o2.stop(ctx.currentTime + 0.3);
+                } catch (_) { /* ignore */ }
+            }, 280);
         } else {
             oscillator.frequency.value = 660;
             gain.gain.value = 0.18;
             oscillator.type = "sine";
+            oscillator.start();
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+            oscillator.stop(ctx.currentTime + 0.4);
         }
 
-        oscillator.start();
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-        oscillator.stop(ctx.currentTime + 0.4);
-
         lastBeepTime = now;
+        lastBeepBand = type;
 
         if (Notification.permission === "granted") {
             new Notification("MyTeslaGuard Alert", {
-                body: type === "red" ? "⚠️ Speed 15+ mph over limit!" : "⚠️ Speed 10-15 mph over limit",
+                body: type === "red"
+                    ? "⚠️ 15+ mph over posted limit — slow down (repeat every 1 min while maintained)"
+                    : "⚠️ 10–15 mph over posted limit (repeat every 3 min while maintained)",
                 icon: "/favicon.ico",
                 silent: false
             });
@@ -146,8 +184,12 @@ function updateUI(data) {
         if (band === "red") currentCircle.classList.add("over-red");
     }
 
-    if ((band === "orange" || band === "red") && band !== lastBand) {
-        playBeep(band);
+    // Periodic / on-entry beeps while overspeed maintained in orange or red
+    if (band === "orange" || band === "red") {
+        playBeepIfDue(band);
+    } else {
+        // Left alert bands — allow immediate beep next time we re-enter
+        lastBeepBand = "none";
     }
     lastBand = band;
 
