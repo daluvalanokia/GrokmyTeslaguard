@@ -5,6 +5,8 @@ namespace MyTeslaGuard.Services
     public interface ITeslaDataService
     {
         Task<VehicleSpeedData> GetCurrentSpeedDataAsync();
-        void SetMockScenario(string scenario); // for demo: "highway", "city", "overspeed"
+        void SetMockScenario(string scenario); // mock only: "highway", "city", "overspeed"
+        bool IsLiveTesla { get; }
+        string DataSourceLabel { get; }
     }
 }

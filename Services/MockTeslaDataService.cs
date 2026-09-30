@@ -9,6 +9,9 @@ namespace MyTeslaGuard.Services
     /// </summary>
     public class MockTeslaDataService : ITeslaDataService
     {
+        public bool IsLiveTesla => false;
+        public string DataSourceLabel => "Mock";
+
         private readonly Random _rnd = new();
         private double _posted = 65;
         private double _current = 62;

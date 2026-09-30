@@ -31,7 +31,24 @@ namespace MyTeslaGuard.Controllers
         public async Task<IActionResult> GetSpeedData()
         {
             var data = await _teslaService.GetCurrentSpeedDataAsync();
-            return Json(data);
+            return Json(new
+            {
+                postedSpeedLimitMph = data.PostedSpeedLimitMph,
+                currentSpeedMph = data.CurrentSpeedMph,
+                speedOverLimitMph = data.SpeedOverLimitMph,
+                overspeedBand = data.OverspeedBand,
+                timestamp = data.Timestamp,
+                isMoving = data.IsMoving,
+                vehicleName = data.VehicleName,
+                batteryPercent = data.BatteryPercent,
+                rangeMiles = data.RangeMiles,
+                tirePressureFl = data.TirePressureFl,
+                tirePressureFr = data.TirePressureFr,
+                tirePressureRl = data.TirePressureRl,
+                tirePressureRr = data.TirePressureRr,
+                isLiveTesla = _teslaService.IsLiveTesla,
+                dataSource = _teslaService.DataSourceLabel
+            });
         }
 
         [HttpPost]
