@@ -139,7 +139,8 @@ function updateUI(data) {
     lastBand = band;
 
     lastUpdateEl.textContent = new Date(data.timestamp).toLocaleTimeString();
-    statusEl.textContent = "Live";
+    const src = data.dataSource || (data.isLiveTesla ? "Tesla" : "Mock");
+    statusEl.textContent = data.isLiveTesla ? `Tesla · ${src}` : `Live · ${src}`;
     statusEl.classList.add("live");
 }
 
