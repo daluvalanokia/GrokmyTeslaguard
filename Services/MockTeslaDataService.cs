@@ -12,7 +12,15 @@ namespace MyTeslaGuard.Services
         private readonly Random _rnd = new();
         private double _posted = 65;
         private double _current = 62;
+        private double _battery = 72;
+        private double _range = 210;
         private string _scenario = "highway";
+
+        // Nominal cold pressures (PSI) – typical Model Y range
+        private double _tpFl = 42.0;
+        private double _tpFr = 42.0;
+        private double _tpRl = 42.0;
+        private double _tpRr = 42.0;
 
         public void SetMockScenario(string scenario)
         {
@@ -41,6 +49,19 @@ namespace MyTeslaGuard.Services
             _current += (_rnd.NextDouble() - 0.5) * 3;
             _current = Math.Max(0, Math.Min(120, _current));
 
+            // Gentle battery drain while "driving"
+            if (_current > 5)
+            {
+                _battery = Math.Max(5, _battery - _rnd.NextDouble() * 0.02);
+                _range = Math.Max(10, _range - _rnd.NextDouble() * 0.08);
+            }
+
+            // Tiny tire pressure noise
+            _tpFl = ClampPressure(_tpFl + (_rnd.NextDouble() - 0.5) * 0.15);
+            _tpFr = ClampPressure(_tpFr + (_rnd.NextDouble() - 0.5) * 0.15);
+            _tpRl = ClampPressure(_tpRl + (_rnd.NextDouble() - 0.5) * 0.15);
+            _tpRr = ClampPressure(_tpRr + (_rnd.NextDouble() - 0.5) * 0.15);
+
             var over = Math.Max(0, _current - _posted);
             string band = over switch
             {
@@ -57,10 +78,18 @@ namespace MyTeslaGuard.Services
                 CurrentSpeedMph = Math.Round(_current, 1),
                 OverspeedBand = band,
                 Timestamp = DateTime.UtcNow,
-                VehicleName = "Model Y (Mock)"
+                VehicleName = "Model Y (Mock)",
+                BatteryPercent = Math.Round(_battery, 1),
+                RangeMiles = Math.Round(_range, 0),
+                TirePressureFl = Math.Round(_tpFl, 1),
+                TirePressureFr = Math.Round(_tpFr, 1),
+                TirePressureRl = Math.Round(_tpRl, 1),
+                TirePressureRr = Math.Round(_tpRr, 1)
             };
 
             return Task.FromResult(data);
         }
+
+        private static double ClampPressure(double p) => Math.Max(28, Math.Min(48, p));
     }
 }

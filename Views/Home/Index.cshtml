@@ -8,7 +8,7 @@
 
     <!-- Transparent HUD Overlay -->
     <div class="hud-overlay">
-        <!-- Top bar: destination + controls -->
+        <!-- Top bar: destination + controls + vehicle status -->
         <div class="nav-top">
             <div class="dest-row">
                 <input type="text" id="destinationInput" class="dest-input"
@@ -23,6 +23,24 @@
                 <span class="app-title">MyTeslaGuard</span>
                 <span class="status" id="connectionStatus">Connecting...</span>
                 <span class="nav-status" id="navStatus">Ready</span>
+            </div>
+
+            <!-- Vehicle status: charge / range + tire pressures (top corner style) -->
+            <div class="vehicle-status">
+                <div class="vs-item charge" title="Battery / Range">
+                    <span class="vs-icon">🔋</span>
+                    <span class="vs-value" id="batteryPct">--%</span>
+                    <span class="vs-sub" id="rangeMiles">-- mi</span>
+                </div>
+                <div class="vs-item tires" title="Tire pressures (PSI)">
+                    <span class="vs-icon">🛞</span>
+                    <div class="tire-grid">
+                        <span class="tire" id="tpFl">FL --</span>
+                        <span class="tire" id="tpFr">FR --</span>
+                        <span class="tire" id="tpRl">RL --</span>
+                        <span class="tire" id="tpRr">RR --</span>
+                    </div>
+                </div>
             </div>
         </div>
 

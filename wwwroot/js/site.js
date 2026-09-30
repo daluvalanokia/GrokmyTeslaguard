@@ -90,7 +90,15 @@ function playBeep(type = "orange") {
     }
 }
 
-// ---------- UI Update (speed HUD) ----------
+// ---------- UI Update (speed HUD + vehicle status) ----------
+function setTire(el, psi, label) {
+    if (!el) return;
+    el.textContent = `${label} ${psi.toFixed(1)}`;
+    el.classList.remove("low", "critical");
+    if (psi < 32) el.classList.add("critical");
+    else if (psi < 36) el.classList.add("low");
+}
+
 function updateUI(data) {
     currentData = data;
 
@@ -99,6 +107,18 @@ function updateUI(data) {
 
     const over = data.speedOverLimitMph;
     overValueEl.textContent = over > 0 ? `${over.toFixed(1)} mph over` : "Within limit";
+
+    // Battery / range (top corner)
+    const battEl = document.getElementById("batteryPct");
+    const rangeEl = document.getElementById("rangeMiles");
+    if (battEl) battEl.textContent = `${data.batteryPercent.toFixed(0)}%`;
+    if (rangeEl) rangeEl.textContent = `${data.rangeMiles.toFixed(0)} mi`;
+
+    // Tire pressures
+    setTire(document.getElementById("tpFl"), data.tirePressureFl, "FL");
+    setTire(document.getElementById("tpFr"), data.tirePressureFr, "FR");
+    setTire(document.getElementById("tpRl"), data.tirePressureRl, "RL");
+    setTire(document.getElementById("tpRr"), data.tirePressureRr, "RR");
 
     currentCircle.classList.remove("over-yellow", "over-orange", "over-red");
     bands.forEach(b => b.classList.remove("active"));

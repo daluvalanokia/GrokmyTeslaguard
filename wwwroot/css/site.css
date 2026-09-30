@@ -133,6 +133,7 @@ html, body {
     justify-content: space-between;
     align-items: center;
     font-size: 0.75rem;
+    margin-bottom: 8px;
 }
 
 .app-title {
@@ -151,6 +152,75 @@ html, body {
 .nav-status {
     color: var(--muted);
     font-style: italic;
+}
+
+/* Vehicle status: charge % / range + tire pressures */
+.vehicle-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 2px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.vs-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+}
+
+.vs-item.charge {
+    flex: 0 0 auto;
+}
+
+.vs-item.tires {
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.vs-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.vs-value {
+    font-weight: 700;
+    color: #3fb950;
+    min-width: 2.8em;
+}
+
+.vs-sub {
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.tire-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 10px;
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.tire {
+    color: var(--text);
+    white-space: nowrap;
+}
+
+.tire.low {
+    color: var(--orange-band);
+    font-weight: 600;
+}
+
+.tire.critical {
+    color: var(--red-band);
+    font-weight: 700;
 }
 
 /* Compact gauges */
