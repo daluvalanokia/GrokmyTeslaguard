@@ -46,6 +46,11 @@ namespace MyTeslaGuard.Controllers
                 tirePressureFr = data.TirePressureFr,
                 tirePressureRl = data.TirePressureRl,
                 tirePressureRr = data.TirePressureRr,
+                latitude = data.Latitude,
+                longitude = data.Longitude,
+                isPluggedIn = data.IsPluggedIn,
+                chargeState = data.ChargeState,
+                makeModelYear = data.MakeModelYear,
                 isLiveTesla = _teslaService.IsLiveTesla,
                 dataSource = _teslaService.DataSourceLabel
             });

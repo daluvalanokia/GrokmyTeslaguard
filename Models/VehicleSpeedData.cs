@@ -15,9 +15,18 @@ namespace MyTeslaGuard.Models
         public double RangeMiles { get; set; }              // estimated remaining miles
 
         // Tire pressures (PSI)
-        public double TirePressureFl { get; set; }          // Front Left
-        public double TirePressureFr { get; set; }          // Front Right
-        public double TirePressureRl { get; set; }          // Rear Left
-        public double TirePressureRr { get; set; }          // Rear Right
+        public double TirePressureFl { get; set; }
+        public double TirePressureFr { get; set; }
+        public double TirePressureRl { get; set; }
+        public double TirePressureRr { get; set; }
+
+        // Geolocation (from Smartcar)
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+
+        // Extended / charge extras
+        public bool? IsPluggedIn { get; set; }
+        public string? ChargeState { get; set; }
+        public string? MakeModelYear { get; set; }
     }
 }

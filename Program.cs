@@ -1,7 +1,5 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Only force 0.0.0.0:5280 in Development / Codespaces.
-// Production (nginx / duckdns) should set ASPNETCORE_URLS itself.
 if (builder.Environment.IsDevelopment())
 {
     builder.WebHost.UseUrls("http://0.0.0.0:5280");
@@ -10,15 +8,18 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 
-// Tesla data source: mock (default) or live Fleet API
-var useMock = builder.Configuration.GetValue("Tesla:UseMockData", true);
+// Data source: Mock (default) or Smartcar (live Tesla via Smartcar)
+// Prefer Smartcar:UseMockData; fall back to legacy Tesla:UseMockData for compatibility
+var useMock = builder.Configuration.GetValue("Smartcar:UseMockData",
+    builder.Configuration.GetValue("Tesla:UseMockData", true));
+
 if (useMock)
 {
     builder.Services.AddSingleton<MyTeslaGuard.Services.ITeslaDataService, MyTeslaGuard.Services.MockTeslaDataService>();
 }
 else
 {
-    builder.Services.AddSingleton<MyTeslaGuard.Services.ITeslaDataService, MyTeslaGuard.Services.FleetTeslaDataService>();
+    builder.Services.AddSingleton<MyTeslaGuard.Services.ITeslaDataService, MyTeslaGuard.Services.SmartcarDataService>();
 }
 
 builder.Services.AddHttpClient("nominatim", client =>
@@ -28,10 +29,10 @@ builder.Services.AddHttpClient("nominatim", client =>
     client.Timeout = TimeSpan.FromSeconds(12);
 });
 
-builder.Services.AddHttpClient("tesla", client =>
+builder.Services.AddHttpClient("smartcar", client =>
 {
     client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-    client.Timeout = TimeSpan.FromSeconds(20);
+    client.Timeout = TimeSpan.FromSeconds(25);
 });
 
 var app = builder.Build();

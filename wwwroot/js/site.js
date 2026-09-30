@@ -120,6 +120,19 @@ function updateUI(data) {
     setTire(document.getElementById("tpRl"), data.tirePressureRl, "RL");
     setTire(document.getElementById("tpRr"), data.tirePressureRr, "RR");
 
+    // Geolocation from Smartcar → move map marker
+    if (data.latitude != null && data.longitude != null && map) {
+        const ll = [data.latitude, data.longitude];
+        if (carMarker) {
+            carMarker.setLatLng(ll);
+        } else {
+            carMarker = L.marker(ll).addTo(map).bindPopup(data.vehicleName || "Vehicle");
+        }
+        if (!isNavigating) {
+            map.panTo(ll);
+        }
+    }
+
     currentCircle.classList.remove("over-yellow", "over-orange", "over-red");
     bands.forEach(b => b.classList.remove("active"));
 
