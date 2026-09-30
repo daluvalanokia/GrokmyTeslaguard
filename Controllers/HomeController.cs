@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using MyTeslaGuard.Models;
 using MyTeslaGuard.Services;
@@ -8,11 +10,16 @@ namespace MyTeslaGuard.Controllers
     {
         private readonly ITeslaDataService _teslaService;
         private readonly ILogger<HomeController> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public HomeController(ITeslaDataService teslaService, ILogger<HomeController> logger)
+        public HomeController(
+            ITeslaDataService teslaService,
+            ILogger<HomeController> logger,
+            IHttpClientFactory httpClientFactory)
         {
             _teslaService = teslaService;
             _logger = logger;
+            _httpClientFactory = httpClientFactory;
         }
 
         public IActionResult Index()
@@ -32,6 +39,52 @@ namespace MyTeslaGuard.Controllers
         {
             _teslaService.SetMockScenario(req?.Scenario ?? "highway");
             return Ok(new { success = true, scenario = req?.Scenario });
+        }
+
+        /// <summary>
+        /// Server-side geocode proxy. Nominatim blocks most browser-origin requests
+        /// on public domains; calling from the backend with a proper User-Agent works.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> Geocode([FromQuery] string q)
+        {
+            if (string.IsNullOrWhiteSpace(q))
+                return BadRequest(new { error = "Missing query parameter q" });
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient("nominatim");
+                var url = $"https://nominatim.openstreetmap.org/search?format=json&q={Uri.EscapeDataString(q.Trim())}&limit=1";
+
+                using var response = await client.GetAsync(url);
+                var body = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Nominatim returned {Status}: {Body}", (int)response.StatusCode, body);
+                    return StatusCode((int)response.StatusCode, new { error = "Geocode provider error", detail = body });
+                }
+
+                using var doc = JsonDocument.Parse(body);
+                var root = doc.RootElement;
+                if (root.GetArrayLength() == 0)
+                    return NotFound(new { error = "Address not found" });
+
+                var first = root[0];
+                var result = new
+                {
+                    lat = double.Parse(first.GetProperty("lat").GetString() ?? "0"),
+                    lng = double.Parse(first.GetProperty("lon").GetString() ?? "0"),
+                    display = first.GetProperty("display_name").GetString()
+                };
+
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Geocode failed for {Query}", q);
+                return StatusCode(502, new { error = "Geocode failed", detail = ex.Message });
+            }
         }
 
         public IActionResult Privacy()

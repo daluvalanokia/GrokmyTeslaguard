@@ -214,19 +214,45 @@ function initMap() {
 }
 
 async function geocode(address) {
-    // Free Nominatim geocoding (respect usage policy – demo only)
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`;
-    const res = await fetch(url, {
-        headers: { "Accept": "application/json", "User-Agent": "MyTeslaGuard/1.0" }
-    });
-    if (!res.ok) throw new Error("Geocode failed");
-    const data = await res.json();
-    if (!data || data.length === 0) throw new Error("Address not found");
-    return {
-        lat: parseFloat(data[0].lat),
-        lng: parseFloat(data[0].lon),
-        display: data[0].display_name
-    };
+    // Proxy through our backend — Nominatim blocks most browser-origin calls on public sites.
+    // Server sends a proper User-Agent and returns { lat, lng, display }.
+    const base = (window.location.pathname.replace(/\/$/, "") || "");
+    // Support both root deploy and subpath (e.g. /teslaguard)
+    const candidates = [
+        `${base}/Home/Geocode?q=${encodeURIComponent(address)}`,
+        `/Home/Geocode?q=${encodeURIComponent(address)}`,
+        `/teslaguard/Home/Geocode?q=${encodeURIComponent(address)}`
+    ];
+
+    let lastErr = null;
+    for (const url of candidates) {
+        try {
+            const res = await fetch(url);
+            if (res.status === 404) {
+                lastErr = new Error("Address not found");
+                // try next path only on hard 404 from wrong route; body may still be address-not-found
+                const body = await res.json().catch(() => ({}));
+                if (body.error === "Address not found") throw lastErr;
+                continue;
+            }
+            if (!res.ok) {
+                const body = await res.json().catch(() => ({}));
+                throw new Error(body.error || body.detail || "Geocode failed");
+            }
+            const data = await res.json();
+            if (data.lat == null || data.lng == null) throw new Error("Address not found");
+            return {
+                lat: parseFloat(data.lat),
+                lng: parseFloat(data.lng),
+                display: data.display || address
+            };
+        } catch (e) {
+            lastErr = e;
+            // network / wrong base path — try next candidate
+            if (e.message === "Address not found") throw e;
+        }
+    }
+    throw lastErr || new Error("Geocode failed");
 }
 
 async function getRoute(from, to, avoidHighways) {
